@@ -15,7 +15,6 @@
 # See http://rubydoc.info/gems/rspec-core/RSpec/Core/Configuration
 require "rspec"
 require "weixin_authorize"
-require 'yajl/json_gem'
 require "redis"
 require "redis-namespace"
 
@@ -37,12 +36,14 @@ SimpleCov.start
 ENV['CODECLIMATE_REPO_TOKEN'] = "c91fecbbd9e414e7cc3ad7a7d99207145de0ac65a3368de09e8c19295343d399"
 CodeClimate::TestReporter.start
 
-ENV["APPID"]="wxe371e0960de5426a"
-ENV["APPSECRET"]="572b93d3d20aea242692a804243a141b"
-ENV["OPENID"]="oEEoyuEasxionjR5HygmEOQGwRcw"
+# If you want test, change your weixin test profile
+ENV["APPID"]="wx986f04063d341d04"
+ENV["APPSECRET"]="1a941cd88cb4579ba98ec06b6813af03"
+ENV["OPENID"]="o9k6BuB0kydAcPTc7sPxppB1GQqA"
+ENV["TEMPLATE_ID"]="-8ooXrOK3VD3HuSS8--nH154PO9Lw2E7T-RV1uTaGLc"
 
 # Comment to test for ClientStorage
-redis = Redis.new(:host => "127.0.0.1",:port => "6379")
+redis = Redis.new(host: "127.0.0.1", port: "6379", db: 15)
 
 namespace = "weixin_test:weixin_authorize"
 
@@ -54,9 +55,11 @@ redis_with_ns = Redis::Namespace.new("#{namespace}", :redis => redis)
 
 WeixinAuthorize.configure do |config|
   config.redis = redis_with_ns
+  config.rest_client_options = {timeout: 10, open_timeout: 10, verify_ssl: true}
 end
 
 $client = WeixinAuthorize::Client.new(ENV["APPID"], ENV["APPSECRET"])
+
 RSpec.configure do |config|
 # The settings below are suggested to provide a good initial experience
 # with RSpec, but feel free to customize to your heart's content.

@@ -22,7 +22,70 @@ module WeixinAuthorize
         download_media_url
       end
 
+      # 上传图文消息素材, 主要用于群发消息接口
+      # {
+      #    "articles": [
+      #      {
+      #        "thumb_media_id":"mwvBelOXCFZiq2OsIU-p",
+      #        "author":"xxx",
+      #        "title":"Happy Day",
+      #        "content_source_url":"www.qq.com",
+      #        "content":"content",
+      #        "digest":"digest"
+      #      },
+      #      {
+      #        "thumb_media_id":"mwvBelOXCFZiq2OsIU-p",
+      #        "author":"xxx",
+      #        "title":"Happy Day",
+      #        "content_source_url":"www.qq.com",
+      #        "content":"content",
+      #        "digest":"digest"
+      #      }
+      #    ]
+      # }
+      # Option: author, content_source_url
+      def upload_mass_news(news=[])
+        upload_news_url = "#{media_base_url}/uploadnews"
+        http_post(upload_news_url, {articles: news})
+      end
+
+      # media_id: 需通过基础支持中的上传下载多媒体文件来得到
+      # https://file.api.weixin.qq.com/cgi-bin/media/uploadvideo?access_token=ACCESS_TOKEN
+
+      # return:
+      # {
+      #   "type":"video",
+      #   "media_id":"IhdaAQXuvJtGzwwc0abfXnzeezfO0NgPK6AQYShD8RQYMTtfzbLdBIQkQziv2XJc",
+      #   "created_at":1398848981
+      # }
+      def upload_mass_video(media_id, title="", desc="")
+        video_msg = {
+          "media_id"    => media_id,
+          "title"       => title,
+          "description" => desc
+        }
+
+        http_post("#{media_base_url}/uploadvideo", video_msg)
+      end
+
+      # 上传图文消息内的图片获取URL
+      # https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=ACCESS_TOKEN
+      #
+      # return:
+      # {
+      #   "url":  "http://mmbiz.qpic.cn/mmbiz/gLO17UPS6FS2xsypf378iaNhWacZ1G1UplZYWEYfwvuU6Ont96b1roYs CNFwaRrSaKTPCUdBK9DgEHicsKwWCBRQ/0"
+      # }
+      def upload_image(image)
+        file = process_file(image)
+        upload_image_url = "#{media_base_url}/uploadimg"
+        http_post(upload_image_url, {media: file}, {type: 'image'}, 'file')
+      end
+
       private
+
+        def media_base_url
+          "/media"
+        end
 
         def process_file(media)
           return media if media.is_a?(File) && jpep?(media)
@@ -39,10 +102,6 @@ module WeixinAuthorize
           file = process_media(uploader)
           CarrierWave.clean_cached_files! # clear last one day cache
           file
-        end
-
-        def media_base_url
-          "/media"
         end
 
         def process_media(uploader)

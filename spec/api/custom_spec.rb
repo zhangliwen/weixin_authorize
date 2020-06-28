@@ -1,5 +1,3 @@
-require "spec_helper"
-
 describe WeixinAuthorize::Api::Custom do
   let(:text_message) do
     "text Custom message"
@@ -44,17 +42,26 @@ describe WeixinAuthorize::Api::Custom do
 
   it "#send_video_custom" do
     pending("The test must have a media_id")
-    this_should_not_get_executed
   end
 
   it "#send_music_custom" do
     pending("The test must have a media_id")
-    this_should_not_get_executed
   end
 
   it "#send_voice_custom" do
     pending("The test must have a media_id")
-    this_should_not_get_executed
+  end
+
+  it "#get_custom_msg_record" do
+    option = {pageindex: 1, pagesize: 10}
+    response = $client.get_custom_msg_record(Time.now - 10.days, Time.now, option)
+    expect(response.code).to eq(WeixinAuthorize::OK_CODE)
+    expect(response.result.keys).to eq(["recordlist", "retcode"])
+  end
+
+  it "#create_kf_session" do
+    response = $client.create_kf_session("test1@test", ENV["APPID"], "test kfsession")
+    expect(response.code).to eq(WeixinAuthorize::OK_CODE)
   end
 
 end
